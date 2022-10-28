@@ -1,8 +1,10 @@
+# Bibliotecas usadas
 import time
-import cv2
-import pytesseract
 import os
-from sklearn.neighbors import KNeighborsClassifier
+
+# Arquivos importados
+from Test import test
+import pytesseractOCR as pyt
 
 def confusionMatrix(database):
     tp = 0
@@ -28,15 +30,24 @@ def confusionMatrix(database):
     f1Score = (2*precision*recall)/(precision+recall)
 
     print("----------Matrix de confusão----------")
-    print(f"True Positive: {tp} | False Positive: {fp}\nFalse Negative: {fn} | True Negative: {tn}")
+    print(f"True Positive: {tp} | False Positive: {fp}\nFalse Negative: {fn} | True Negative: {tn}\n")
 
     print("--------------Pontuation--------------")
-    print(f"Acurácia: {int(accuracy)}%\nPrecisão: {int(precision)}%\nRevocação: {int(recall)}%\nF1-Score: {int(f1Score)}%")
+    print(f"Acurácia: {round(accuracy*100, 2)}%\nPrecisão: {round(precision*100, 2)}%\nRevocação: {round(recall*100, 2)}%\nF1-Score: {round(f1Score*100, 2)}%")
 
-def showDataBase(database):
+def showDataBase(list):
     print("Pasta | Arquivo | Eh a letra I")
-    for i in database:
+    for i in list:
         print(f"{i[0]}   | {i[1]}   | {i[2]}")
+
+def allPaths():
+    folder = r".\testDataset"
+    paths = []
+    for directory, subfolders, files in os.walk(folder):
+        for file in files:
+            paths.append(os.path.join(directory, file))
+
+    return paths
 
 def recognizeAll():
     start = time.process_time()
@@ -44,7 +55,7 @@ def recognizeAll():
     database = []
     count = 0
     for i in allPaths():
-        letter = recognizeImg(i)
+        letter = pyt.recognizeImg(i)
         if letter in approved:
             print(f"{i} → {letter} → Eh um I")
             database.append([i.split('\\')[2], i.split('\\')[4].split('_')[2].replace('.png', ''), 0])
@@ -60,27 +71,6 @@ def recognizeAll():
     print(f"\nTempo de execução: {end - start}\n")
 
     confusionMatrix(database)
-
-def allPaths():
-    folder = r".\testDataset"
-    paths = []
-    for directory, subfolders, files in os.walk(folder):
-        for file in files:
-            paths.append(os.path.join(directory, file))
-
-    return paths
-
-def recognizeImg(pathImg):
-    # Lendo e exibindo a imagem
-    img = cv2.imread(pathImg)
-    # cv2.imshow("Imagem", img)
-    # cv2.waitKey(1)
-
-    # Caminho onde foi instalado o PYTESSERACT(sem isso seu código dará um erro)
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\Tesseract.exe"
-
-    # Reconhecendo a imagem e retornando em string o reconhecimento da imagem
-    return pytesseract.image_to_string(img, lang="eng", config="--oem 0 --psm 10 -c tessedit_char_blacklist=0123456789").strip()
 
 def main():
     recognizeAll()

@@ -1,12 +1,12 @@
 # Bibliotecas usadas
 import time
-import cv2
-import pytesseract
 import os
-from sklearn.neighbors import KNeighborsClassifier
 
 # Arquivos importados
-import test
+from Test import test
+import pytesseractOCR as pyt
+import easyOCR as eas
+import kerasOCR as ker
 
 def confusionMatrix(database):
     tp = 0
@@ -51,25 +51,13 @@ def allPaths():
 
     return paths
 
-def recognizeImg(pathImg):
-    # Lendo e exibindo a imagem
-    img = cv2.imread(pathImg)
-    # cv2.imshow("Imagem", img)
-    # cv2.waitKey(1)
-
-    # Caminho onde foi instalado o PYTESSERACT(sem isso seu código dará um erro)
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\Tesseract.exe"
-
-    # Reconhecendo a imagem e retornando em string o reconhecimento da imagem
-    return pytesseract.image_to_string(img, lang="eng", config="--oem 0 --psm 10 -c tessedit_char_blacklist=0123456789").strip()
-
 def recognizeAll():
     start = time.process_time()
     approved = ['i', 'í', 'I', 'Í']
     database = []
     count = 0
     for i in allPaths():
-        letter = recognizeImg(i)
+        letter = ker.recognizeImg(i)
         if letter in approved:
             print(f"{i} → {letter} → Eh um I")
             database.append([i.split('\\')[2], i.split('\\')[4].split('_')[2].replace('.png', ''), 0])
@@ -88,4 +76,3 @@ def recognizeAll():
 
 if __name__ == '__main__':
     recognizeAll()
-    # test.main()
